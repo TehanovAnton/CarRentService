@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://thymeleaf.org">
     <head>
         <meta charset="UTF-8">
         <title>Home</title>
@@ -8,5 +8,12 @@
         <form th:action="@{/user/sign_out}" method="post" >
             <button type="submit">sign out</button>
         </form>
+
+        <div th:each="rent : ${rents}">
+            <p th:text="${rent.car.brand}"></p>
+            <p th:text="${rent.leaseDuration}"></p>
+            <p th:text="${rent.rentDate}"></p>
+            <a th:href="@{/rent/update/details(id=rent.getId())}">update</a>
+        </div>
     </body>
 </html>

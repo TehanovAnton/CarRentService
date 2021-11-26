@@ -1,6 +1,8 @@
 package com.example.carrentservice.controllers;
 
+import com.example.carrentservice.models.Rent;
 import com.example.carrentservice.models.User;
+import com.example.carrentservice.repository.RentRepository;
 import com.example.carrentservice.repository.UserRepository;
 import com.example.carrentservice.services.RegistrationServices;
 import com.example.carrentservice.services.UserControllerServices;
@@ -16,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 
 @Slf4j
@@ -26,20 +29,30 @@ public class UsersController
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RentRepository rentRepository;
+
     private static RegistrationServices registrationServices;
-    private static UserControllerServices usersControllerService;
+    private static UserControllerServices services;
 
     static
     {
         registrationServices = new RegistrationServices();
-        usersControllerService = new UserControllerServices();
+        services = new UserControllerServices();
+    }
+    
+    @GetMapping("/user/home")
+    public ModelAndView Home(Model model) {
+        List<Rent> rents = services.Rents(rentRepository);
+        services.AddAttr(model, rents);
+        return services.ModelAndView("Home");
     }
 
     @GetMapping(value = { "/user/new" })
     public ModelAndView New(Model model)
     {
-        usersControllerService.AddNewUserAttr(model);
-        return usersControllerService.ReturnView("UsersNew");
+        services.AddNewUserAttr(model);
+        return services.ModelAndView("UsersNew");
     }
 
     @PostMapping(value = { "/user/create" })

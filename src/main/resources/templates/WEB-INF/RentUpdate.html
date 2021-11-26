@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+<form th:action="@{/rent/update}" method="post" th:object="${rentForm}">
+    <span th:text="${rent.rentDate}"></span>
+    <input type="date" th:field="*{rentDate}">
+
+    <span th:text="${rent.leaseDuration}"></span>
+    <input type="number" th:field="*{leaseDuration}">
+
+    <span th:text="rent.brand"></span>
+    <input type="text" th:field="*{brand}">
+
+    <button type="submit">update rent</button>
+</form>
+</body>
+</html>

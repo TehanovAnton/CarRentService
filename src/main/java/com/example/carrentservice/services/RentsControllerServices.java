@@ -24,7 +24,7 @@ public class RentsControllerServices {
         return rent;
     }
 
-    public void AddNewRentFormAttr(Model model) {
+    public void AddRentFormAttr(Model model) {
         RentForm rentForm = new RentForm();
         model.addAttribute("rentForm", rentForm);
     }
@@ -33,7 +33,7 @@ public class RentsControllerServices {
         rentsRepository.save(rent);
     }
 
-    public ModelAndView ReturnView(String viewName) {
+    public ModelAndView ModelAndView(String viewName) {
         ModelAndView modelAndView = new ModelAndView(viewName);
         return modelAndView;
     }

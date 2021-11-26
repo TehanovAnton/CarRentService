@@ -30,19 +30,10 @@ public class Car {
     @Getter
     @Setter
     @Column(nullable = false)
-    // rent price per day ($)
     private Integer rentPrice;
 
     @Getter
     @Setter
-    @Column(columnDefinition = "nvarchar(255) not null default 'free'")
+    @Column(nullable = false)
     private String rentState;
-
-
-    private Integer rent_id;
-
-    @Getter
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "rent_id", nullable = false, insertable = false, updatable = false)
-    private Rent rent;
 }

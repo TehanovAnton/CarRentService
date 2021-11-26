@@ -26,6 +26,7 @@ public class Rent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Getter
     private Integer id;
 
     @Getter

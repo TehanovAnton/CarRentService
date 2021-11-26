@@ -19,10 +19,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
-@Controller
-@RequestMapping
-public class SessionsController {
+@RestController
+public class SessionsController extends ApplicationController {
 
     @Getter
     private static User currentUser;
@@ -31,7 +29,6 @@ public class SessionsController {
     private UserRepository userRepository;
 
     private static SessionControllerServices services;
-
     static {
         services = new SessionControllerServices();
     }
@@ -45,9 +42,11 @@ public class SessionsController {
     @PostMapping("/user/session/create")
     public void CreateSession(@ModelAttribute("signInSet") SignInSet signInSet, HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (services.CheckUserBySignInSet(signInSet, userRepository)) {
-            services.CreateSession(request);
-            currentUser = services.getUser(signInSet, userRepository);
-            response.sendRedirect("/rent/new");
+            if (!running()) {
+                services.CreateSession(request);
+                currentUser = services.getUser(signInSet, userRepository);
+            }
+            response.sendRedirect("/user/home");
         }
         else {
             response.sendRedirect("/user/sign_in");
@@ -59,5 +58,9 @@ public class SessionsController {
         services.DestroySession(request);
         services.AddViewAttr(model, "signInSet", new SignInSet());
         return services.ReturnView("SignIn");
+    }
+
+    public static Boolean running() {
+        return currentUser != null;
     }
 }
