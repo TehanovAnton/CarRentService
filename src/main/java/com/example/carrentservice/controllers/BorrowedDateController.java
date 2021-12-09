@@ -7,6 +7,7 @@ import com.example.carrentservice.services.CustomerService;
 import com.example.carrentservice.services.MailService;
 import it.ozimov.springboot.mail.configuration.EnableEmailTools;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
@@ -23,7 +24,6 @@ import java.util.List;
 @RequestMapping
 @SessionAttributes({ "customer", "borrowedDate" })
 public class BorrowedDateController {
-
     private CarService carService;
     private BorrowedDateService borrowedDateService;
     private CustomerService customerService;
@@ -39,28 +39,28 @@ public class BorrowedDateController {
         this.mailService = mailService;
     }
 
-    @GetMapping(value = "/customer/books")
-    public ModelAndView showBooks(Model model) {
+    @GetMapping(value = "/borrowedDates")
+    public ModelAndView borrowedDates(Model model) {
         if (customer == null)
             customer = customerService.findCustomerByActive(true);
 
         List<Car> customerBorrowedCars = carService.findAllByCustomerId(customer.getId());
         List<BorrowedDate> customerBorrowedDates = borrowedDateService.findAllByCustomerId(customer.getId());
-        List<ShowBorrowedDate> dates = showCustomerBooks(customerBorrowedDates, customerBorrowedCars);
+        List<ShowBorrowedDate> dates = showCustomerBorrowedDates(customerBorrowedDates, customerBorrowedCars);
 
         model.addAttribute("borrowedDates", dates);
         return new ModelAndView("ShowBooks");
     }
 
-    @DeleteMapping(path = { "/id}" })
+    @PostMapping(path = { "/{book_id}" })
     public ModelAndView delete(Model model,
                                @RequestParam("book_id") Long bookId) {
         borrowedDateService.deleteById(bookId);
-        return new ModelAndView("redirect:/customer/books");
+        return new ModelAndView("redirect:/borrowedDates");
     }
 
     @GetMapping(value = "/customer/book/edit{book_id}")
-    public ModelAndView editBookPage(Model model,
+    public ModelAndView editBorrowedDatePage(Model model,
                                      @RequestParam(value="start_date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")
                                                  String start_date,
                                      @RequestParam(value="end_date",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -86,7 +86,7 @@ public class BorrowedDateController {
 
 
     @PostMapping(value="/book/update")
-    public ModelAndView editBook(Model model,
+    public ModelAndView editBorrowedDate(Model model,
                                     @RequestParam(value="car_id")
                                             Long carId,
                                     @RequestParam(value="start_date") @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -101,7 +101,7 @@ public class BorrowedDateController {
         borrowedDate.setCar(carService.findById(carId).get());
         borrowedDateService.save(borrowedDate);
 
-        return new ModelAndView("redirect:/customer/books");
+        return new ModelAndView("redirect:/borrowedDates");
     }
 
 
@@ -116,7 +116,7 @@ public class BorrowedDateController {
     }
 
 
-    private List<ShowBorrowedDate> showCustomerBooks(List<BorrowedDate> customerBorrowedDates, List<Car> customerBorrowedCars) {
+    private List<ShowBorrowedDate> showCustomerBorrowedDates(List<BorrowedDate> customerBorrowedDates, List<Car> customerBorrowedCars) {
         List<ShowBorrowedDate> dates = new ArrayList<ShowBorrowedDate>();
         for (int i = 0; i < customerBorrowedCars.size(); i++) {
             dates.add(new ShowBorrowedDate(customerBorrowedDates.get(i), customerBorrowedCars.get(i)));
@@ -126,7 +126,7 @@ public class BorrowedDateController {
 
 
     @GetMapping(value = "/bookPartOne{car_id}")
-    public ModelAndView checkDates(Model model,
+    public ModelAndView bookPartOne(Model model,
                                    @RequestParam(value = "car_id") Long carId,
                                    @RequestParam(value = "start_date", defaultValue = "2000-01-01", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Calendar startDate,
                                    @RequestParam(value = "end_date", defaultValue = "2000-01-01", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Calendar endDate) {
@@ -134,20 +134,20 @@ public class BorrowedDateController {
         carById = carService.findById(carId).get();
         List<AvailableCarsResult> availableCarById = borrowedDateService.checkAvailableCarById(startDate, endDate, carId);
 
-        
+
         model.addAttribute("carById", carById);
         model.addAttribute("availableCarById", availableCarById);
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         model.addAttribute("start_date", format.format(startDate.getTime()));
         model.addAttribute("end_date", format.format(endDate.getTime()));
-        
+
         return new ModelAndView("bookPartOne");
     }
 
 
     @PostMapping(value = "/bookPartOne")
-    public ModelAndView createNewCustomer(Model model,
+    public ModelAndView createNew(Model model,
                                           @RequestParam(value = "start_date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Calendar startDate,
                                           @RequestParam(value = "end_date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Calendar endDate,
                                           @RequestParam(value = "car_id") Long carId) {
@@ -163,12 +163,11 @@ public class BorrowedDateController {
         model.addAttribute("customer", customer);
         model.addAttribute("borrowedDate", borrowedDate);
 
-        String url = "redirect:/bookPartTwo?car_id=" + carId.toString();
-        return new ModelAndView(url);
+        return new ModelAndView("redirect:/bookPartTwo?car_id=" + carId.toString());
     }
 
     @GetMapping(value = "bookPartTwo{car_id}")
-    public ModelAndView showSessionCar(Model model, BorrowedDate borrowedDate) {
+    public ModelAndView creditCard(Model model, BorrowedDate borrowedDate) {
         model.addAttribute("carById", carById);
         model.addAttribute("customer", customer);
         model.addAttribute("borrowedDate", borrowedDate);
@@ -186,8 +185,7 @@ public class BorrowedDateController {
         initCustomer(customer, new BigDecimal(cardNumber), new BigDecimal(cvv), days);
 
         model.addAttribute("car_id", carId);
-        String url = "redirect:/bookResume?car_id=" + carId;
-        return new ModelAndView(url);
+        return new ModelAndView("redirect:/bookResume?car_id=" + carId);
     }
 
     @GetMapping(value = "bookResume{car_id}")
@@ -199,7 +197,7 @@ public class BorrowedDateController {
     }
 
     @PostMapping(value = "bookResume")
-    public ModelAndView completeAll(SessionStatus status, BorrowedDate borrowedDate) {
+    public ModelAndView saveBorrowedDate(SessionStatus status, BorrowedDate borrowedDate) {
         borrowedDateService.save(borrowedDate);
         mailService.sendMail(customer, borrowedDate, carById);
         status.setComplete();
